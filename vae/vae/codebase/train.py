@@ -4,7 +4,8 @@ import numpy as np
 import os
 # import tensorflow as tf
 import torch
-from codebase import utils as ut
+#from codebase import utils as ut
+import utils as ut
 from torch import nn, optim
 from torch.nn import functional as F
 from torchvision.utils import save_image
