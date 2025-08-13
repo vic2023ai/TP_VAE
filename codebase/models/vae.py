@@ -43,30 +43,6 @@ class VAE(nn.Module):
         # Todas las salidas deben ser escalares
         ################################################################################
 
-   # Paso 1: obtener parámetros q(z|x)
-    m, v = self.enc(x)
-
-    # Paso 2: muestrear z ~ q(z|x) usando reparametrización
-    z = ut.sample_gaussian(m, v)
-
-    # Paso 3: decodificar z -> logits p(x|z)
-    logits = self.dec(z)
-
-    # Paso 4: calcular KL(q(z|x) || p(z))
-    kl = ut.log_normal(z, m, v) - ut.log_normal(z, self.z_prior[0], self.z_prior[1])
-
-    # Paso 5: calcular término de reconstrucción (-log p(x|z))
-    rec = -ut.log_bernoulli_with_logits(x=x, logits=logits)
-
-    # Paso 6: sumar para obtener nelbo
-    nelbo = kl + rec
-
-    # Paso 7: convertir a escalares (promedio sobre batch)
-    nelbo = torch.mean(nelbo)
-    kl = torch.mean(kl)
-    rec = torch.mean(rec)
-		
-		
         ################################################################################
         # Fin de la modificación del código
         ################################################################################
