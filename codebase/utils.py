@@ -39,12 +39,19 @@ def sample_gaussian(m, v):
     ################################################################################
     # TODO: Modifique/completar el código aquí
     # Muestrea z
+
+    # Reparametrización: z = m + sqrt(v) * eps, eps ~ N(0, I)
+    eps = torch.randn_like(m)  
+    z = m + torch.sqrt(v) * eps
+
+
     ################################################################################
 
     ################################################################################
     # Fin de la modificación del código
     ################################################################################
     return z
+
 
 
 def log_normal(x, m, v):
@@ -66,6 +73,11 @@ def log_normal(x, m, v):
     # TODO: Modifique/completar el código aquí
     # Calcule la probabilidad logarítmica elemento a elemento de la normal y recuerde sumar sobre
     # la última dimensión
+
+    # Fórmula: log N(x; m, v) = -0.5 * [ log(2πv) + ((x - m)^2) / v ]
+    log_prob_elementwise = -0.5 * (torch.log(2 * torch.tensor(np.pi)) + torch.log(v) + (x - m).pow(2) / v)
+    log_prob = log_prob_elementwise.sum(dim=-1)
+
     ################################################################################
 
     ################################################################################
@@ -92,6 +104,12 @@ def log_normal_mixture(z, m, v):
     # en el batch
     ################################################################################
     # expanda z para que coincida la dimensionalidad de m y v
+
+    z_expanded = z.unsqueeze(1)  # (batch, 1, dim)
+    log_probs = -0.5 * (torch.log(2 * torch.tensor(np.pi)) + torch.log(v) + (z_expanded - m).pow(2) / v)
+    log_probs = log_probs.sum(dim=-1)  # (batch, mix)
+    # media logarítmica (pesos uniformes en la mezcla)
+    log_prob = log_mean_exp(log_probs, dim=1)  # (batch,)
 
     ################################################################################
     # Fin de la modificación del código
@@ -412,7 +430,6 @@ def get_mnist_index(i, test=True):
 
     if test:
         return test_idx[i]
-
     else:
         return train_idx[i]
 
